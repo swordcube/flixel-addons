@@ -49,7 +49,7 @@ class FlxSkewedSprite extends FlxSprite
 
 	override function drawComplex(camera:FlxCamera):Void
 	{
-		_frame.prepareMatrix(_matrix, FlxFrameAngle.ANGLE_0, checkFlipX(), checkFlipY());
+		_frame.prepareMatrix(_matrix, FlxFrameAngle.ANGLE_0, checkFlipX() != camera.flipX, checkFlipY() != camera.flipY);
 		_matrix.translate(-origin.x, -origin.y);
 
 		if (frameOffsetAngle != null && frameOffsetAngle != angle)

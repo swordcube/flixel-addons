@@ -44,8 +44,11 @@ class Transition extends FlxSubState
 	{
 		super.destroy();
 		finishCallback = null;
-		_effect.destroy();
-		_effect = null;
+		if (_effect != null)
+		{
+			_effect.destroy();
+			_effect = null;
+		}
 	}
 
 	public function start(NewStatus:TransitionStatus):Void
