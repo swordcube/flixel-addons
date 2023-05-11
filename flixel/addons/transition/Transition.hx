@@ -14,6 +14,7 @@ import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
+import flixel.FlxCamera;
 
 /**
  * This substate is automatically created to play the actual transition visuals inside a FlxTransitionState.
@@ -28,6 +29,12 @@ class Transition extends FlxSubState
 
 	public function new(data:TransitionData)
 	{
+		var cam = new FlxCamera(0, 0, Std.int(data.region.width), Std.int(data.region.height));
+		cam.bgColor = 0x0;
+		cam.setSize(Std.int(data.region.width), Std.int(data.region.height));
+		FlxG.cameras.add(cam, false);
+		cameras = [cam];
+		
 		super(FlxColor.TRANSPARENT);
 		_effect = createEffect(data);
 		_effect.scrollFactor.set(0, 0);
