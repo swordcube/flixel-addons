@@ -94,7 +94,7 @@ class FlxSkewedSprite extends FlxSprite
 
 		doAdditionalMatrixStuff(_matrix, camera);
 
-		camera.drawPixels(_frame, framePixels, _matrix, colorTransform, blend, antialiasing, shader);
+		camera.drawPixels(_frame, framePixels, _matrix, colorTransform, blend, antialiasing, shaderEnabled ? shader : null);
 	}
 
 	function updateSkewMatrix():Void
