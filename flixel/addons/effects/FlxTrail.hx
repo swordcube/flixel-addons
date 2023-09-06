@@ -1,5 +1,6 @@
 package flixel.addons.effects;
 
+import flixel.graphics.frames.FlxFrame;
 import flixel.animation.FlxAnimation;
 import flixel.FlxG;
 import flixel.FlxSprite;
@@ -80,17 +81,26 @@ class FlxTrail extends FlxSpriteGroup
 	var _difference:Float;
 
 	var _recentPositions:Array<FlxPoint> = [];
+	var _recentOffsets:Array<FlxPoint> = [];
+	var _recentFrameOffsets:Array<FlxPoint> = [];
+	var _recentOrigins:Array<FlxPoint> = [];
 	var _recentAngles:Array<Float> = [];
+	var _recentFrameAngles:Array<Float> = [];
 	var _recentScales:Array<FlxPoint> = [];
-	var _recentFrames:Array<Int> = [];
+	// var _recentFrames:Array<Int> = [];
+	var _recentFrame:Array<FlxFrame> = [];
 	var _recentFlipX:Array<Bool> = [];
 	var _recentFlipY:Array<Bool> = [];
-	var _recentAnimations:Array<FlxAnimation> = [];
+
+	// var _recentAnimations:Array<FlxAnimation> = [];
 
 	/**
 	 * Stores the sprite origin (rotation axis)
 	 */
-	var _spriteOrigin:FlxPoint;
+	// var _spriteOrigin:FlxPoint;
+	public var beforeCache:Void->Void;
+
+	public var afterCache:Void->Void;
 
 	/**
 	 * Creates a new FlxTrail effect for a specific FlxSprite.
@@ -106,7 +116,7 @@ class FlxTrail extends FlxSpriteGroup
 	{
 		super();
 
-		_spriteOrigin = FlxPoint.get().copyFrom(Target.origin);
+		// _spriteOrigin = FlxPoint.get().copyFrom(Target.origin);
 
 		// Sync the vars
 		target = Target;
@@ -125,11 +135,16 @@ class FlxTrail extends FlxSpriteGroup
 		_recentAngles = null;
 		_recentPositions = FlxDestroyUtil.putArray(_recentPositions);
 		_recentScales = FlxDestroyUtil.putArray(_recentScales);
-		_recentFrames = null;
+		_recentFrameOffsets = FlxDestroyUtil.putArray(_recentFrameOffsets);
+		_recentOffsets = FlxDestroyUtil.putArray(_recentOffsets);
+		_recentOrigins = FlxDestroyUtil.putArray(_recentOrigins);
+		_recentFrameAngles = null;
+		// _recentFrames = null;
+		_recentFrame = null;
 		_recentFlipX = null;
 		_recentFlipY = null;
-		_recentAnimations = null;
-		_spriteOrigin = FlxDestroyUtil.put(_spriteOrigin);
+		// _recentAnimations = null;
+		// _spriteOrigin = FlxDestroyUtil.put(_spriteOrigin);
 
 		target = null;
 		_graphic = null;
@@ -150,50 +165,37 @@ class FlxTrail extends FlxSpriteGroup
 		{
 			_counter = 0;
 
-			// Push the current position into the positons array and drop one.
-			var spritePosition:FlxPoint = null;
-			if (_recentPositions.length == _trailLength)
-			{
-				spritePosition = _recentPositions.pop();
-			}
-			else
-			{
-				spritePosition = FlxPoint.get();
-			}
+			if (beforeCache != null)
+				beforeCache();
 
-			spritePosition.set(target.x - target.offset.x, target.y - target.offset.y);
-			_recentPositions.unshift(spritePosition);
+			// Push the current position into the positons array and drop one.
+			cachePoint(_recentPositions, new FlxPoint(target.x, target.y));
 
 			// Also do the same thing for the Sprites angle if rotationsEnabled
 			if (rotationsEnabled)
 			{
 				cacheValue(_recentAngles, target.angle);
+				cacheValue(_recentFrameAngles, target.frameOffsetAngle);
 			}
 
 			// Again the same thing for Sprites scales if scalesEnabled
 			if (scalesEnabled)
 			{
-				var spriteScale:FlxPoint = null; // sprite.scale;
-				if (_recentScales.length == _trailLength)
-				{
-					spriteScale = _recentScales.pop();
-				}
-				else
-				{
-					spriteScale = FlxPoint.get();
-				}
-
-				spriteScale.set(target.scale.x, target.scale.y);
-				_recentScales.unshift(spriteScale);
+				cachePoint(_recentScales, target.scale);
 			}
+
+			cachePoint(_recentFrameOffsets, target.frameOffset);
+			cachePoint(_recentOffsets, target.offset);
+			cachePoint(_recentOrigins, target.origin);
 
 			// Again the same thing for Sprites frames if framesEnabled
 			if (framesEnabled && _graphic == null)
 			{
-				cacheValue(_recentFrames, target.animation.frameIndex);
+				// cacheValue(_recentFrames, target.animation.frameIndex);
 				cacheValue(_recentFlipX, target.flipX);
 				cacheValue(_recentFlipY, target.flipY);
-				cacheValue(_recentAnimations, target.animation.curAnim);
+				// cacheValue(_recentAnimations, target.animation.curAnim);
+				cacheValue(_recentFrame, target.frame);
 			}
 
 			// Now we need to update the all the Trailsprites' values
@@ -205,13 +207,19 @@ class FlxTrail extends FlxSpriteGroup
 				trailSprite.x = _recentPositions[i].x;
 				trailSprite.y = _recentPositions[i].y;
 
+				trailSprite.offset.x = _recentOffsets[i].x;
+				trailSprite.offset.y = _recentOffsets[i].y;
+				trailSprite.frameOffset.x = _recentFrameOffsets[i].x;
+				trailSprite.frameOffset.y = _recentFrameOffsets[i].y;
+
 				// And the angle...
 				if (rotationsEnabled)
 				{
 					trailSprite.angle = _recentAngles[i];
-					trailSprite.origin.x = _spriteOrigin.x;
-					trailSprite.origin.y = _spriteOrigin.y;
+					trailSprite.frameOffsetAngle = _recentFrameAngles[i];
 				}
+				trailSprite.origin.x = _recentOrigins[i].x;
+				trailSprite.origin.y = _recentOrigins[i].y;
 
 				// the scale...
 				if (scalesEnabled)
@@ -223,19 +231,39 @@ class FlxTrail extends FlxSpriteGroup
 				// and frame...
 				if (framesEnabled && _graphic == null)
 				{
-					trailSprite.animation.frameIndex = _recentFrames[i];
+					// trailSprite.animation.frameIndex = _recentFrames[i];
 					trailSprite.flipX = _recentFlipX[i];
 					trailSprite.flipY = _recentFlipY[i];
 
-					trailSprite.animation.curAnim = _recentAnimations[i];
+					// trailSprite.animation.curAnim = _recentAnimations[i];
+					trailSprite.frame = _recentFrame[i];
 				}
 
 				// Is the trailsprite even visible?
 				trailSprite.exists = true;
 			}
+
+			if (afterCache != null)
+				afterCache();
 		}
 
 		super.update(elapsed);
+	}
+
+	function cachePoint(array:Array<FlxPoint>, value:FlxPoint)
+	{
+		var point:FlxPoint = null;
+		if (array.length == _trailLength)
+		{
+			point = array.pop();
+		}
+		else
+		{
+			point = FlxPoint.get();
+		}
+
+		point.set(value.x, value.y);
+		array.unshift(point);
 	}
 
 	function cacheValue<T>(array:Array<T>, value:T)
@@ -247,12 +275,17 @@ class FlxTrail extends FlxSpriteGroup
 	public function resetTrail():Void
 	{
 		_recentPositions.splice(0, _recentPositions.length);
+		_recentOffsets.splice(0, _recentOffsets.length);
+		_recentOrigins.splice(0, _recentOrigins.length);
+		_recentFrameOffsets.splice(0, _recentFrameOffsets.length);
+		_recentFrameAngles.splice(0, _recentFrameAngles.length);
 		_recentAngles.splice(0, _recentAngles.length);
 		_recentScales.splice(0, _recentScales.length);
-		_recentFrames.splice(0, _recentFrames.length);
+		// _recentFrames.splice(0, _recentFrames.length);
+		_recentFrame.splice(0, _recentFrame.length);
 		_recentFlipX.splice(0, _recentFlipX.length);
 		_recentFlipY.splice(0, _recentFlipY.length);
-		_recentAnimations.splice(0, _recentAnimations.length);
+		// _recentAnimations.splice(0, _recentAnimations.length);
 
 		for (i in 0...members.length)
 		{

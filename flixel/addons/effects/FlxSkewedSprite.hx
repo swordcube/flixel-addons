@@ -83,12 +83,18 @@ class FlxSkewedSprite extends FlxSprite
 		}
 
 		getScreenPosition(_point, camera).subtractPoint(offset);
-		_point.addPoint(origin);
-		if (isPixelPerfectRender(camera))
-			_point.floor();
-
+		_point.add(origin.x, origin.y);
 		_matrix.translate(_point.x, _point.y);
-		camera.drawPixels(_frame, framePixels, _matrix, colorTransform, blend, antialiasing, shader);
+
+		if (isPixelPerfectRender(camera))
+		{
+			_matrix.tx = Math.floor(_matrix.tx);
+			_matrix.ty = Math.floor(_matrix.ty);
+		}
+
+		doAdditionalMatrixStuff(_matrix, camera);
+
+		camera.drawPixels(_frame, framePixels, _matrix, colorTransform, blend, antialiasing, shaderEnabled ? shader : null);
 	}
 
 	function updateSkewMatrix():Void
