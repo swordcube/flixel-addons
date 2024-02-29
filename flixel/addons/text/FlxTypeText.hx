@@ -11,7 +11,7 @@ import flixel.sound.FlxSound;
 import flixel.system.FlxSound;
 #end
 import flixel.math.FlxRandom;
-import flash.media.Sound;
+import openfl.media.Sound;
 
 #if !flash
 @:sound("assets/sounds/type.ogg")

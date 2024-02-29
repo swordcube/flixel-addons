@@ -1,6 +1,6 @@
 package flixel.addons.editors.tiled;
 
-import flash.utils.ByteArray;
+import openfl.utils.ByteArray;
 #if haxe4
 import haxe.xml.Access;
 #else
