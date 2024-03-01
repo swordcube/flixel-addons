@@ -99,8 +99,7 @@ class FlxPexParser
 		emitter.scale.end.min.set(finishSize.min / particle.frameWidth * scale, finishSize.min / particle.frameHeight * scale);
 		emitter.scale.end.max.set(finishSize.max / particle.frameWidth * scale, finishSize.max / particle.frameHeight * scale);
 
-		emitter.alpha.set(startColors.minColor.alphaFloat, startColors.maxColor.alphaFloat, finishColors.minColor.alphaFloat,
-			finishColors.maxColor.alphaFloat);
+		emitter.alpha.set(startColors.minColor.alphaFloat, startColors.maxColor.alphaFloat, finishColors.minColor.alphaFloat, finishColors.maxColor.alphaFloat);
 		emitter.color.set(startColors.minColor, startColors.maxColor, finishColors.minColor, finishColors.maxColor);
 
 		if (config.hasNode.blendFuncSource && config.hasNode.blendFuncDestination)
@@ -248,8 +247,7 @@ class FlxPexParser
 	}
 }
 
-@:enum
-abstract PexEmitterType(Int) from Int
+enum abstract PexEmitterType(Int) from Int
 {
 	var GRAVITY = 0;
 	var RADIAL = 1;
