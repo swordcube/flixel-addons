@@ -129,7 +129,7 @@ class FlxNestedSprite extends FlxSprite
 			return Child;
 
 		// First, look if the member at position is null, so we can directly assign the Child at the position.
-		if (position < length && children[position] == null)
+		if (position < children.length && children[position] == null)
 		{
 			children[position] = Child;
 
@@ -178,7 +178,6 @@ class FlxNestedSprite extends FlxSprite
 		if (Splice)
 		{
 			children.splice(index, 1);
-			length--;
 		}
 		else
 			children[index] = null;
@@ -200,7 +199,6 @@ class FlxNestedSprite extends FlxSprite
 		if (Splice)
 		{
 			children.splice(Index, 1);
-			length--;
 		}
 		else
 			children[Index] = null;
@@ -322,7 +320,8 @@ class FlxNestedSprite extends FlxSprite
 
 	override public function draw():Void
 	{
-		super.draw();
+		if (_frame != null)
+			super.draw();
 
 		for (child in children)
 		{
