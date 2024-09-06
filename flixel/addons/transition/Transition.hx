@@ -13,6 +13,7 @@ import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
+import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxTimer;
 import flixel.FlxCamera;
 
@@ -51,11 +52,7 @@ class Transition extends FlxSubState
 	{
 		super.destroy();
 		finishCallback = null;
-		if (_effect != null)
-		{
-			_effect.destroy();
-			_effect = null;
-		}
+		_effect = FlxDestroyUtil.destroy(_effect);
 	}
 
 	public function start(NewStatus:TransitionStatus):Void

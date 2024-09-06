@@ -5,6 +5,7 @@ import flixel.FlxSprite;
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxFrame;
 import flixel.math.FlxMath;
+import flixel.math.FlxRect;
 import flixel.system.FlxAssets.FlxGraphicAsset;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
@@ -106,6 +107,13 @@ class FlxTiledSprite extends FlxStrip
 		return this;
 	}
 
+	override function set_clipRect(Value:FlxRect):FlxRect
+	{
+		regen = true;
+
+		return super.set_clipRect(Value);
+	}
+
 	override function set_graphic(Value:FlxGraphic):FlxGraphic
 	{
 		if (graphic != Value)
@@ -144,7 +152,7 @@ class FlxTiledSprite extends FlxStrip
 			renderSprite.x = x;
 			renderSprite.y = y;
 			renderSprite.scrollFactor.set(scrollFactor.x, scrollFactor.y);
-			renderSprite.cameras = cameras;
+			renderSprite._cameras = _cameras;
 			renderSprite.draw();
 		}
 		else
